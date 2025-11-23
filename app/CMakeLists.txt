@@ -1,0 +1,1 @@
+add_executable(main.cpp app) # TODO: your app name
