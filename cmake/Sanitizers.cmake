@@ -19,8 +19,8 @@ set(UBSAN_FLAGS
 
 # --- ASAN Sanitizer ---
 set(ASAN_FLAGS 
-    -fsanitize=address
-    -fno-omit-frame-pointer)
+  -fsanitize=address
+  -fno-omit-frame-pointer)
 
 # --- TSAN Sanitizer ---
 set(TSAN_FLAGS 

@@ -7,9 +7,8 @@ add_library(project_options INTERFACE)
 # --- GCC/Clang Compiler ---
 set(GCC_BASE_COMPILE
   -Wall -Wextra -Wpedantic
-  -Werror
+  -Werror -fPIE
   -fstack-protector-strong
-  -fPIE
 )
 
 set(GCC_AGGRESSIVE_COMPILE
