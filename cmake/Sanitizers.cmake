@@ -1,3 +1,7 @@
+# cmake/Sanitizers.cmake
+
+include_guard()
+
 add_library(project_sanitizers INTERFACE)
 
 # ========================================
@@ -11,56 +15,54 @@ set_property(CACHE SANITIZER_MODE PROPERTY STRINGS "None" "Address" "Thread" "Me
 # 2. Sanitizer Presets
 # ========================================
 
-# --- UBSAN Sanitizer ---
+# --- GNU/CLANG ---
+# --- UBSAN ---
 set(UBSAN_FLAGS
   -fsanitize=undefined
   -fno-sanitize-recover=undefined
   -fno-omit-frame-pointer)
 
-# --- ASAN Sanitizer ---
+# --- ASAN + UBSAN ---
 set(ASAN_FLAGS
   -fsanitize=address
-  -fno-omit-frame-pointer)
+  ${UBSAN_FLAGS})
 
-# --- TSAN Sanitizer ---
+# --- TSAN + UBSAN ---
 set(TSAN_FLAGS
   -fsanitize=thread
-  -fno-omit-frame-pointer)
+  ${UBSAN_FLAGS})
 
-# --- MSAN Sanitizer ---
+# --- MSAN + UBSAN ---
 set(MSAN_FLAGS
   -fsanitize=memory
   -fsanitize-memory-track-origins
-  -fno-omit-frame-pointer)
+  ${UBSAN_FLAGS})
+
+# --- MSVC ---
+# --- ASAN ---
+set(MSVC_ASAN_FLAGS
+  /fsanitize=address)
 
 # ========================================
 # 3. Applying Logic
 # ========================================
 
 if(NOT SANITIZER_MODE STREQUAL "None")
-  message(STATUS "Enabling Sanitizers: ${SANITIZER_MODE}")
+  list(APPEND SAN_APPLIED_FLAGS
+    # --- ASAN + UBSAN ---
+    $<$<AND:$<STREQUAL:${SANITIZER_MODE},Address>,$<COMPILE_LANG_AND_ID:CXX,GNU,Clang>>:${ASAN_UBSAN_FLAGS}>
+    $<$<AND:$<STREQUAL:${SANITIZER_MODE},Address>,$<COMPILER_ID:MSVC>>:${MSVC_ASAN_FLAGS}>
 
-  # --- GCC/Clang Sanitizers ---
-  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if(SANITIZER_MODE STREQUAL "Address")
-      set(SAN_FLAGS ${ASAN_FLAGS} ${UBSAN_FLAGS})
-    elseif(SANITIZER_MODE STREQUAL "Thread")
-      set(SAN_FLAGS ${TSAN_FLAGS} ${UBSAN_FLAGS})
-    elseif(SANITIZER_MODE STREQUAL "Memory")
-      set(SAN_FLAGS ${MSAN_FLAGS} ${UBSAN_FLAGS})
-    elseif(SANITIZER_MODE STREQUAL "Undefined")
-      set(SAN_FLAGS ${UBSAN_FLAGS})
-    endif()
+    # --- TSAN + UBSAN ---
+    $<$<AND:$<STREQUAL:${SANITIZER_MODE},Thread>,$<COMPILE_LANG_AND_ID:CXX,GNU,Clang>>:${TSAN_UBSAN_FLAGS}>
 
-    target_compile_options(project_sanitizers INTERFACE ${SAN_FLAGS})
-    target_link_options(project_sanitizers INTERFACE ${SAN_FLAGS})
+    # --- MSAN + UBSAN ---
+    $<$<AND:$<STREQUAL:${SANITIZER_MODE},Memory>,$<COMPILE_LANG_AND_ID:CXX,GNU,Clang>>:${MSAN_UBSAN_FLAGS}>
 
-    # --- MSVC Sanitizers ---
-  elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    if(SANITIZER_MODE STREQUAL "Address")
-      target_compile_options(project_sanitizers INTERFACE /fsanitize=address)
-    else()
-      message(WARNING "Only Address sanitizer is supported on MSVC")
-    endif()
-  endif()
+    # --- UBSAN ---
+    $<$<AND:$<STREQUAL:${SANITIZER_MODE},Undefined>,$<COMPILE_LANG_AND_ID:CXX,GNU,Clang>>:${UBSAN_FLAGS}>
+  )
+
+  target_compile_options(project_sanitizers INTERFACE ${SAN_APPLIED_FLAGS})
+  target_link_options(project_sanitizers INTERFACE ${SAN_APPLIED_FLAGS})
 endif()

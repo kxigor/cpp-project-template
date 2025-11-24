@@ -79,6 +79,16 @@
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     },
     {
+      "name": "ci-final-release",
+      "displayName": "Release (No Sanitizers, No tests)",
+      "description": "Maximum optimization, final deployment build",
+      "inherits": ["base", "mixin-san-none"],
+      "cacheVariables": { 
+        "CMAKE_BUILD_TYPE": "Release",
+        "ENABLE_TESTING": "OFF"
+      }
+    },
+    {
       "name": "ci-relwithdebinfo",
       "displayName": "RelWithDebInfo",
       "inherits": ["base", "mixin-san-none"],

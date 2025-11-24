@@ -1,13 +1,5 @@
 # ========================================
-# 1. FINDING ALL DEPENDENCIES
-# ========================================
-
-find_package(Python3 REQUIRED)
-find_program(CLANG_FORMAT_EXE clang-format)
-find_program(CLANG_TIDY_EXE clang-tidy)
-
-# ========================================
-# 2. FINDING ALL FILES FOR STATIC ANALISYS
+# 1. FINDING ALL FILES FOR STATIC ANALISYS
 # ========================================
 
 file(GLOB_RECURSE ALL_SRCS
@@ -20,16 +12,15 @@ file(GLOB_RECURSE ALL_SRCS
 )
 
 # ========================================
-# 3. SETTING SCRIPTS/CONFIGS
+# 2. SETTING SCRIPTS/CONFIGS
 # ========================================
 
 set(SCRIPTS_DIR "${PROJECT_SOURCE_DIR}/tests/scripts")
 set(FORMAT_CONFIG "${PROJECT_SOURCE_DIR}/.clang-format")
 set(TIDY_CONFIG "${PROJECT_SOURCE_DIR}/.clang-tidy")
 
-
 # ========================================
-# 4. SETTING TARGETS
+# 3. SETTING TARGETS
 # ========================================
 
 # --- Format target ---
@@ -40,6 +31,12 @@ if(CLANG_FORMAT_EXE)
     --format-exec ${CLANG_FORMAT_EXE}
     --config ${FORMAT_CONFIG}
     --files ${ALL_SRCS}
+  )
+else()
+  add_test(
+    NAME FormatCheck
+    COMMAND ${CMAKE_COMMAND} -E echo
+    "WARNING: Clang-Format not found. FormatCheck test skipped."
   )
 endif()
 
@@ -52,5 +49,11 @@ if(CLANG_TIDY_EXE)
     --build-dir ${CMAKE_BINARY_DIR}
     --config ${TIDY_CONFIG}
     ${ALL_SRCS}
+  )
+else()
+  add_test(
+    NAME TidyCheck
+    COMMAND ${CMAKE_COMMAND} -E echo
+    "WARNING: Clang-Tidy not found. TidyCheck test skipped."
   )
 endif()

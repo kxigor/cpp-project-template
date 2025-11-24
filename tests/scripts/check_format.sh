@@ -9,7 +9,7 @@ usage() {
 
 FORMAT_CMD=""
 CONFIG_FILE=""
-FILES=""
+FILES=()
 
 while [[ $# -gt 0 ]]; do
     case $1 in 
@@ -23,7 +23,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --files)
             shift
-            FILES="$@"
+            FILES=("$@")
             break
             ;;
         *)
@@ -56,7 +56,7 @@ fi
 FAILED=0
 echo "Checking format with config: $CONFIG_FILE"
 
-for FILE in $FILES; do
+for FILE in "${FILES[@]}"; do
     if [[ ! -f "$FILE" ]]; then
         echo "Warning: File $FILE not found, skipping."
         continue

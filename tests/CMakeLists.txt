@@ -1,2 +1,5 @@
+include(FindTestTools)
+include(GtestTools)
+
 add_subdirectory(static)
 add_subdirectory(unit)
