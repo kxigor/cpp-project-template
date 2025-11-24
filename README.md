@@ -22,3 +22,6 @@ cmake --preset dev-debug-asan --fresh
 cmake --build --preset dev-debug-asan --target format
 ctest --preset dev-debug-asan --include TidyCheck
 ```
+
+# TODO
+fix CXX_COMPILER_ID:MSVC
