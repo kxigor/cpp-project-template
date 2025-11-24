@@ -12,18 +12,18 @@ set_property(CACHE SANITIZER_MODE PROPERTY STRINGS "None" "Address" "Thread" "Me
 # ========================================
 
 # --- UBSAN Sanitizer ---
-set(UBSAN_FLAGS 
-  -fsanitize=undefined 
+set(UBSAN_FLAGS
+  -fsanitize=undefined
   -fno-sanitize-recover=undefined
   -fno-omit-frame-pointer)
 
 # --- ASAN Sanitizer ---
-set(ASAN_FLAGS 
+set(ASAN_FLAGS
   -fsanitize=address
   -fno-omit-frame-pointer)
 
 # --- TSAN Sanitizer ---
-set(TSAN_FLAGS 
+set(TSAN_FLAGS
   -fsanitize=thread
   -fno-omit-frame-pointer)
 
@@ -54,8 +54,8 @@ if(NOT SANITIZER_MODE STREQUAL "None")
 
     target_compile_options(project_sanitizers INTERFACE ${SAN_FLAGS})
     target_link_options(project_sanitizers INTERFACE ${SAN_FLAGS})
-      
-  # --- MSVC Sanitizers ---
+
+    # --- MSVC Sanitizers ---
   elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     if(SANITIZER_MODE STREQUAL "Address")
       target_compile_options(project_sanitizers INTERFACE /fsanitize=address)
