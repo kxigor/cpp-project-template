@@ -47,52 +47,51 @@
 
     {
       "name": "dev-debug-asan",
-      "displayName": "Debug + Address Sanitizer",
+      "displayName": "Debug + Tests + Address Sanitizer",
       "description": "Standard development build: Debug symbols + ASan + UBSan",
       "inherits": ["base", "mixin-san-address"],
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     },
     {
       "name": "dev-debug-tsan",
-      "displayName": "Debug + Thread Sanitizer",
+      "displayName": "Debug + Tests + Thread Sanitizer",
       "inherits": ["base", "mixin-san-thread"],
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     },
     {
       "name": "dev-debug-msan",
-      "displayName": "Debug + Memory Sanitizer",
+      "displayName": "Debug + Tests + Memory Sanitizer",
       "inherits": ["base", "mixin-san-memory"],
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     },
     {
       "name": "dev-debug-ubsan",
-      "displayName": "Debug + Only UBSan",
+      "displayName": "Debug + Tests + Only Undefined Sanitizer",
       "inherits": ["base", "mixin-san-undefined"],
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     },
-
     {
-      "name": "ci-release",
-      "displayName": "Release (No Sanitizers)",
+      "name": "ci-relwithdebinfo",
+      "displayName": "Release + Tests + Debug info",
+      "inherits": ["base", "mixin-san-none"],
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" }
+    },
+    {
+      "name": "ci-tests-release",
+      "displayName": "Release + Tests",
       "description": "Maximum optimization, no sanitizers",
       "inherits": ["base", "mixin-san-none"],
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     },
     {
-      "name": "ci-final-release",
-      "displayName": "Release (No Sanitizers, No tests)",
+      "name": "ci-release",
+      "displayName": "Release",
       "description": "Maximum optimization, final deployment build",
       "inherits": ["base", "mixin-san-none"],
       "cacheVariables": { 
         "CMAKE_BUILD_TYPE": "Release",
         "ENABLE_TESTING": "OFF"
       }
-    },
-    {
-      "name": "ci-relwithdebinfo",
-      "displayName": "RelWithDebInfo",
-      "inherits": ["base", "mixin-san-none"],
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo" }
     }
   ],
 
@@ -101,7 +100,7 @@
     { "name": "dev-debug-tsan", "configurePreset": "dev-debug-tsan" },
     { "name": "dev-debug-msan", "configurePreset": "dev-debug-msan" },
     { "name": "dev-debug-ubsan", "configurePreset": "dev-debug-ubsan" },
-    { "name": "ci-release",     "configurePreset": "ci-release" },
+    { "name": "ci-tests-release", "configurePreset": "ci-tests-release" },
     { "name": "ci-relwithdebinfo", "configurePreset": "ci-relwithdebinfo" }
   ],
 
@@ -109,8 +108,7 @@
     {
       "name": "dev-debug-asan",
       "configurePreset": "dev-debug-asan",
-      "output": { "outputOnFailure": true },
-      "execution": { "noTestsAction": "error", "stopOnFailure": true }
+      "output": { "outputOnFailure": true }
     },
     {
       "name": "dev-debug-tsan",
@@ -118,8 +116,8 @@
       "output": { "outputOnFailure": true }
     },
     {
-      "name": "ci-release",
-      "configurePreset": "ci-release",
+      "name": "ci-tests-release",
+      "configurePreset": "ci-tests-release",
       "output": { "outputOnFailure": true }
     }
   ]

@@ -70,19 +70,19 @@ target_compile_options(project_options INTERFACE
   # --- GNU/CLANG ---
   $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANG_AND_ID:CXX,GNU,Clang>>: ${GCC_DEBUG_COMPILE} ${GCC_AGGRESSIVE_COMPILE}>
   # --- MSVC ---
-  $<$<AND:$<CONFIG:Debug>,$<COMPILER_ID:MSVC>>: ${MSVC_DEBUG_COMPILE}>
+  $<$<AND:$<CONFIG:Debug>,$<CXX_COMPILER_ID:MSVC>>: ${MSVC_DEBUG_COMPILE}>
 
   # --- RelWithDebInfo ---
   # --- GNU/CLANG ---
   $<$<AND:$<CONFIG:RelWithDebInfo>,$<COMPILE_LANG_AND_ID:CXX,GNU,Clang>>: ${GCC_RELWITHDEB}>
   # --- MSVC ---
-  $<$<AND:$<CONFIG:RelWithDebInfo>,$<COMPILER_ID:MSVC>>: ${MSVC_RELWITHDEB}>
+  $<$<AND:$<CONFIG:RelWithDebInfo>,$<CXX_COMPILER_ID:MSVC>>: ${MSVC_RELWITHDEB}>
 
   # --- Release ---
   # --- GNU/CLANG ---
   $<$<AND:$<CONFIG:Release>,$<COMPILE_LANG_AND_ID:CXX,GNU,Clang>>: ${GCC_RELEASE}>
   # --- MSVC ---
-  $<$<AND:$<CONFIG:Release>,$<COMPILER_ID:MSVC>>: ${MSVC_RELEASE}>
+  $<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:MSVC>>: ${MSVC_RELEASE}>
 )
 
 target_link_options(project_options INTERFACE
@@ -94,5 +94,5 @@ target_link_options(project_options INTERFACE
 
   # --- Release ---
   # --- MSVC ---
-  $<$<AND:$<CONFIG:Release>,$<COMPILER_ID:MSVC>>: /LTCG>
+  $<$<AND:$<CONFIG:Release>,$<CXX_COMPILER_ID:MSVC>>: /LTCG>
 )
