@@ -68,6 +68,7 @@ The template includes specialized profiles for debugging various issues:
 | `dev-debug-tsan` | Thread | Data races and deadlocks in concurrent code. |
 | `dev-debug-msan` | Memory | Checks for uninitialized reads (Requires special libc++ build). |
 | `dev-debug-ubsan` | Undefined | Undefined Behavior (e.g., integer overflows, unaligned loads). |
+
 *ubsan is included in all other sanitizer modes.*
 
 Example to build with Thread Sanitizer (TSan):
@@ -163,7 +164,3 @@ cmake --preset dev-debug-asan --fresh
 cmake --build --preset dev-debug-asan --target format
 ctest --preset dev-debug-asan --include TidyCheck
 ```
-
-# TODO
-fix CXX_COMPILER_ID:MSVC
->>>>>>> 1d6d514dbfd41d311e19a7df4db3d5a536f1b893
