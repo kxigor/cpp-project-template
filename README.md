@@ -154,4 +154,16 @@ cmake --build --preset ci-release
 
 # 2. Run All Tests (Unit + Static Analysis)
 ctest --preset ci-release
+
+cmake --build --preset dev-debug-asan --target clean
+cmake --build --preset ci-release --target clean
+
+cmake --preset dev-debug-asan --fresh
+
+cmake --build --preset dev-debug-asan --target format
+ctest --preset dev-debug-asan --include TidyCheck
 ```
+
+# TODO
+fix CXX_COMPILER_ID:MSVC
+>>>>>>> 1d6d514dbfd41d311e19a7df4db3d5a536f1b893
