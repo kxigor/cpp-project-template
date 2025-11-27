@@ -8,7 +8,7 @@ This repository serves as a robust foundation for C++ projects, configured for t
 * **Build System:** Uses `CMakePresets.json` for streamlined, repeatable configuration across different environments.
 * **Code Safety (Sanitizers):** Seamless integration with Clang/GCC Sanitizers (Address, Thread, Memory, Undefined).
 * **Code Quality:**
-  * Strict compiler warnings enforced via `cmake/CompilerWarnings.cmake`.
+  * Strict compiler warnings enforced via `cmake/ProjectOptions.cmake`.
   * Automatic formatting check (`clang-format`).
   * Static analysis (`clang-tidy`).
 * **Testing:** Integrated unit testing using Google Test (GTest).
