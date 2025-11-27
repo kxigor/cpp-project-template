@@ -1,166 +1,248 @@
 # Modern C++ Project Template
 
-This repository serves as a robust foundation for C++ projects, configured for the modern **C++23** standard. It features a pre-configured CMake build system, integration with code sanitizers, static analysis, code formatting, and unit testing.
+This repository serves as a robust foundation for C++ projects, configured for the modern **C++23** standard. It features a pre-configured CMake build system, integration with code sanitizers, static analysis, code formatting, and comprehensive testing tools.
 
 ## Features at a Glance
 
 * **Standard:** C++23 required.
 * **Build System:** Uses `CMakePresets.json` for streamlined, repeatable configuration across different environments.
-* **Code Safety:** Seamless integration with Clang/GCC Sanitizers (Address, Thread, Memory, Undefined).
+* **Code Safety (Sanitizers):** Seamless integration with Clang/GCC Sanitizers (Address, Thread, Memory, Undefined).
 * **Code Quality:**
-    * Strict compiler warnings (`-Wall -Wextra -Wpedantic`, etc.) enforced via `CompilerWarnings.cmake`.
-    * Automatic formatting check (`clang-format`).
-    * Static analysis (`clang-tidy`).
+  * Strict compiler warnings enforced via `cmake/CompilerWarnings.cmake`.
+  * Automatic formatting check (`clang-format`).
+  * Static analysis (`clang-tidy`).
 * **Testing:** Integrated unit testing using Google Test (GTest).
+* **Code Coverage:** Integrated LCOV/GCOV generation.
 
 ## Prerequisites
-
 To fully utilize this project, you will need the following tools installed:
-
 * **CMake** (version 3.25 or higher)
-* **C++ Compiler** with C++23 support (GCC, Clang, or MSVC)
+* **C++ Compiler** with C++23 support (GCC 13+, Clang 16+, or MSVC)
 * **Ninja** (Recommended generator, specified in the presets)
-* **Python 3** (Required for the static analysis scripts)
-* **GTest** (The build script attempts to find it via `find_package(GTest)`)
-* **LLVM Utilities** (`clang-format`, `clang-tidy`, `gcov/lcov`(optional))
+* **LLVM Utilities:** `clang-format`, `clang-tidy`
+* **Coverage Tools:** `gcov`, `lcov`, and `genhtml` (required for coverage reports).
 
 ## Building and Running
 
-The project heavily relies on **CMake Presets** defined in `CMakePresets.json`. This simplifies the build process by eliminating the need for long, error-prone command-line arguments.
+The project heavily relies on **CMake Presets** defined in `CMakePresets.json`.
 
 ### 1. View Available Presets
-
 To see all available configurations:
-
-```bash
+```shell
 cmake --list-presets
-````
+```
 
-### 2\. Configuration and Building (Development)
-
+### 2. Standard Development and Debugging
 The most common scenario is a Debug build with the **Address Sanitizer (ASan)** enabled to catch memory leaks and access violations.
 
-**Configure:**
+| Configuration | Command | Description |
+|:---|:---|:---|
+| **Configure** | `cmake --preset dev-debug-asan` | Configures a Debug build with ASan enabled. |
+| **Build** | `cmake --build --preset dev-debug-asan` | Builds all targets (app, tests) in the ASan configuration. |
+| **Run Executable** | `./build/dev-debug-asan/app/app` | Executes the main application. |
 
-```bash
-cmake --preset dev-debug-asan
-```
+### 3. Using Sanitizer Profiles
+The template includes specialized profiles for debugging various issues.
 
-**Build:**
+| Preset Name | Sanitizer | Compiler Flags Added | Purpose |
+|:---|:---|:---|:---|
+| `dev-debug-asan` | Address Sanitizer | `-fsanitize=address` | Memory errors, leaks, use-after-free. |
+| `dev-debug-tsan` | Thread Sanitizer | `-fsanitize=thread` | Data races and deadlocks in concurrent code. |
+| `dev-debug-msan` | Memory Sanitizer | `-fsanitize=memory` | Checks for uninitialized reads (special setup required). |
+| `dev-debug-ubsan` | Undefined Behavior Sanitizer | `-fsanitize=undefined` | Integer overflows, unaligned loads, null pointer references. |
 
-```bash
-cmake --build --preset dev-debug-asan
-```
-
-*Alternatively (Standard CMake):*
-
-```bash
-cmake --build build/dev-debug-asan
-```
-
-### 3\. Using Other Sanitizer Profiles
-
-The template includes specialized profiles for debugging various issues:
-
-| Preset Name | Sanitizer | Purpose |
-| :--- | :--- | :--- |
-| `dev-debug-asan` | Address | Memory errors, leaks, use-after-free. |
-| `dev-debug-tsan` | Thread | Data races and deadlocks in concurrent code. |
-| `dev-debug-msan` | Memory | Checks for uninitialized reads (Requires special libc++ build). |
-| `dev-debug-ubsan` | Undefined | Undefined Behavior (e.g., integer overflows, unaligned loads). |
-
-*ubsan is included in all other sanitizer modes.*
-
-Example to build with Thread Sanitizer (TSan):
-```bash
-cmake --preset dev-debug-tsan
-cmake --build --preset dev-debug-tsan
-```
-
-### 4\. Release Build (CI / Production)
-
+### 4. Release Build (CI / Production)
 For maximum performance (no sanitizers, optimized compilation):
 
-```bash
-cmake --preset ci-release
-cmake --build --preset ci-release
-```
+| Configuration | Command | Description |
+|:---|:---|:---|
+| **Configure** | `cmake --preset ci-release` | Configures a Release build (`-O3 -DNDEBUG`). |
+| **Build** | `cmake --build --preset ci-release` | Builds all targets with optimizations. |
 
 ## Testing and Quality Checks
+Tests and quality checks are managed using CTest, allowing them to be run across any configuration profile.
 
-Tests are managed using CTest. Test presets are defined to match the configuration presets.
+### 1. Running Unit Tests (GTest)
+Unit tests are linked against the `project_coverage` target, so they generate coverage data when compiled with the `ci-coverage` preset, and they use the selected sanitizer in `dev-debug-*` presets.
 
-### Unit Tests (GTest)
+**Run tests in the ASan configuration:**
 
-Run the unit tests compiled under the `dev-debug-asan` configuration:
+```shell
+# Configure and build first
+cmake --preset dev-debug-asan
+cmake --build --preset dev-debug-asan
 
-```bash
+# Run all tests linked to ASan
 ctest --preset dev-debug-asan
 ```
 
-### Static Analysis and Formatting
+**Running specific tests:**
 
-The `clang-format` and `clang-tidy` checks are implemented as **CTest tests**. This allows them to run alongside unit tests or individually.
+You can use CTest's regular expression filtering:
 
-**Run Format Check only:**
+```shell
+# Run all tests
+ctest --preset dev-debug-asan
 
-```bash
-ctest --preset dev-debug-asan -R FormatCheck
+# Run tests only from the 'Basic' suite
+ctest --preset dev-debug-asan -R Basic
 ```
 
-**Run Tidy Check only (Static Analysis):**
+### 2. Static Analysis and Formatting
 
-```bash
-ctest --preset dev-debug-asan -R TidyCheck
+Static analysis tools are registered as custom targets or CTest tests within the project.
+
+| QA Target | CTest Command | Custom Build Command | Purpose |
+|:---|:---|:---|:---|
+| **Format Check** | `ctest --preset <preset> -R FormatCheck` | `cmake --build --preset <preset> --target format` | Runs `clang-format` in check mode. |
+| **Tidy Check** | `ctest --preset <preset> -R TidyCheck` | N/A | Runs `clang-tidy` for static analysis. |
+
+### 3. Code Coverage (LCOV/GCOV)
+
+To generate a coverage report, you must use the special **`ci-coverage`** preset, which enables the necessary `--coverage` flags (handled by `cmake/ProjectCoverage.cmake`).
+
+**Step 1: Configure and Build (using coverage flags)**
+
+```shell
+cmake --preset ci-coverage
+cmake --build --preset ci-coverage
 ```
 
-*Note: The Tidy Check requires the `compile_commands.json` file, which is automatically generated by the presets.*
+**Step 2: Run the dedicated `coverage` target**
 
-## Project Structure Explained
+This target automatically performs zero-counting, runs CTest to generate `.gcda` files, captures the data into LCOV format, filters system headers, and generates the final HTML report.
 
-| Directory | Purpose |
-| :--- | :--- |
-| `app/` | Contains the `main.cpp` and configuration for the primary executable. |
-| `src/` | Source files for the core library. Should be compiled into a library target. |
-| `include/` | Public header files, often installed or included by other components. |
-| `tests/unit/` | Google Test suites and source files. |
-| `tests/static/` | Configuration for static analysis targets. |
-| `tests/scripts/` | Python/Bash scripts that execute `clang-format` and `clang-tidy`. |
-| `cmake/` | Custom CMake modules (`CompilerWarnings.cmake`, `Sanitizers.cmake`, etc.). |
-| `CMakePresets.json` | Defines all configuration and build presets. |
+```shell
+cmake --build --preset ci-coverage --target coverage
+```
 
-## Customization
+The final HTML report will be located at: **`build/ci-coverage/coverage_report/index.html`**
 
-To adapt this template to your own project:
+## Configuration Details
 
-1.  Open the root `CMakeLists.txt`.
-2.  Change the project name in the first line:
-    ```cmake
-    project(MyCoolNewApp LANGUAGES CXX)
-    ```
-3.  Add your application logic in `src/` and include public interfaces in `include/`.
-4.  Add new test suites to `tests/unit/` and register them in `tests/unit/CMakeLists.txt` using the provided `add_gtest` function:
-    ```cmake
-    add_gtest(MyModuleTest SOURCES my_module_test.cpp LIBRARIES project_lib)
-    ```
+### CMake Modules and Targets
 
-## Contribution Guidelines
+| Module File | Interface Target | Description |
+|:---|:---|:---|
+| `ProjectOptions.cmake` | `project_options` | Sets required C++ standard (C++23) and optimization level (`-O3`). |
+| `ProjectSanitizers.cmake` | `project_sanitizers` | Applies ASan, TSan, MSan, or UBSan flags conditionally. |
+| `ProjectCoverage.cmake` | `project_coverage` | Applies GCC/Clang `--coverage` flags conditionally. |
 
-Before submitting any code changes, ensure all quality checks and tests pass using a clean release configuration:
+To apply flags to a target (e.g., `app`), you link against the corresponding interface target:
 
-```bash
-# 1. Configure and Build
-cmake --preset ci-release
-cmake --build --preset ci-release
+```cmake
+target_link_libraries(app
+  PRIVATE
+    project_options
+    project_sanitizers
+    project_coverage
+)
+```
 
-# 2. Run All Tests (Unit + Static Analysis)
-ctest --preset ci-release
+# GTest Usage Examples: add_gtest function
 
-cmake --build --preset dev-debug-asan --target clean
-cmake --build --preset ci-release --target clean
+The examples below illustrate how to use the `add_gtest` function to register Google Test suites within the CMake build system, from the simplest case to the most complex one.
 
-cmake --preset dev-debug-asan --fresh
+## 1. Simplest Example (Minimal Configuration)
 
-cmake --build --preset dev-debug-asan --target format
-ctest --preset dev-debug-asan --include TidyCheck
+This example is suitable for basic tests that link against a core project library and do not require special options or sanitizers.
+
+### Scenario: Testing a basic math utility.
+
+```cmake
+add_gtest(BasicMathTest
+  SOURCES
+    math_test.cpp
+  LIBRARIES
+    MyCoreLib::Math
+    GTest::gtest_main
+)
+````
+
+| Argument | Description |
+|:---|:---|
+| `BasicMathTest` | The name of the test executable and the test name in CTest. |
+| `SOURCES` | The single source file for the test executable. |
+| `LIBRARIES` | Links against the library under test and the main GTest library. |
+
+-----
+
+## 2\. Standard Example (Including Sanitizers and Coverage)
+
+This is the most common scenario, involving linking against the interface targets `project_options`, `project_sanitizers`, and `project_coverage` to ensure automatic support for all build modes (Debug, ASan, Coverage).
+
+### Scenario: Testing a network connection API component.
+
+```cmake
+add_gtest(NetworkAPITests
+  SOURCES
+    api_test.cpp
+    connection_mock.cpp
+  LIBRARIES
+    MyCoreLib::Networking
+    project_options
+    project_sanitizers
+    project_coverage
+  PROPERTIES
+    TIMEOUT 90
+)
+```
+
+| Argument | Description |
+|:---|:---|
+| `SOURCES` | Multiple files: the test itself and possibly mocks/stubs. |
+| `LIBRARIES` | Includes all interface targets for full integration. |
+| `PROPERTIES` | Sets a CTest property: execution timeout of 90 seconds. |
+
+-----
+
+## 3\. Advanced Example (Using All Flags)
+
+This example demonstrates the use of all available arguments, useful for tests that require a specific environment, custom compilation flags, or execution in a single thread.
+
+### Scenario: Testing a critical, thread-sensitive code section with extra debugging definitions.
+
+```cmake
+add_gtest(CriticalSectionTests
+  SOURCES
+    lock_free_test.cpp
+  LIBRARIES
+    MyCoreLib::Concurrency
+    project_options
+    project_sanitizers
+  
+  # Options
+  EXCLUSIVE
+  
+  # Values
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/data
+  
+  # Additional compiler and linker settings
+  INCLUDE_DIRECTORIES
+    ${CMAKE_SOURCE_DIR}/third_party/atomic_queue/include
+  COMPILE_OPTIONS
+    -Wno-conversion
+  COMPILE_DEFINITIONS
+    USE_DEBUG_LOGGING
+    LOCK_FREE_ENABLED
+  LINK_OPTIONS
+    -Wl,--export-dynamic
+  
+  # Additional CTest properties
+  PROPERTIES
+    TIMEOUT 180
+    FIXTURES_SETUP "Setup_Heavy_System"
+    ENVIRONMENT "DEBUG_LEVEL=5;CONFIG_FILE=test.conf"
+)
+
+```
+| Argument | Description |
+|:---|:---|
+| `EXCLUSIVE` | Ensures this test runs sequentially (not in parallel), which is critical for TSan tests. |
+| `WORKING_DIRECTORY` | Sets the working directory, e.g., to access test data (config files). |
+| `INCLUDE_DIRECTORIES` | Adds an external header path (e.g., for a third-party library). |
+| `COMPILE_OPTIONS` | Suppresses a specific warning only for this test file. |
+| `COMPILE_DEFINITIONS` | Defines macros required for conditional compilation in test mode. |
+| `LINK_OPTIONS` | Passes specific flags to the linker. |
+| `PROPERTIES` | Additional CTest properties, including setting environment variables (`ENVIRONMENT`) or using test fixtures. |
 ```

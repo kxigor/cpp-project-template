@@ -16,7 +16,6 @@
         "ENABLE_TESTING": "ON"
       }
     },
-    
     {
       "name": "mixin-san-address",
       "hidden": true,
@@ -71,6 +70,19 @@
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
     },
     {
+      "name": "ci-coverage",
+      "displayName": "Release + UnitTests + Coverage",
+      "description" : "Build with GCOV flags. Static analysis is disabled for speed.",
+      "inherits": ["base", "mixin-san-none"],
+      "cacheVariables": { 
+        "CMAKE_BUILD_TYPE": "Release",
+        "ENABLE_COVERAGE": "ON",
+        "ENABLE_UNITTESTS": "ON",
+        "ENABLE_FORMAT_CHECK": "OFF",
+        "ENABLE_TIDY_CHECK": "OFF"
+      }
+    },
+    {
       "name": "ci-relwithdebinfo",
       "displayName": "Release + Tests + Debug info",
       "inherits": ["base", "mixin-san-none"],
@@ -79,14 +91,14 @@
     {
       "name": "ci-tests-release",
       "displayName": "Release + Tests",
-      "description": "Maximum optimization, no sanitizers",
+      "description": "Maximum optimization, no sanitizers, runs all tests",
       "inherits": ["base", "mixin-san-none"],
       "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
     },
     {
       "name": "ci-release",
       "displayName": "Release",
-      "description": "Maximum optimization, final deployment build",
+      "description": "Final deployment build. No testing.",
       "inherits": ["base", "mixin-san-none"],
       "cacheVariables": { 
         "CMAKE_BUILD_TYPE": "Release",
@@ -100,19 +112,27 @@
     { "name": "dev-debug-tsan", "configurePreset": "dev-debug-tsan" },
     { "name": "dev-debug-msan", "configurePreset": "dev-debug-msan" },
     { "name": "dev-debug-ubsan", "configurePreset": "dev-debug-ubsan" },
+    { "name": "ci-coverage", "configurePreset": "ci-coverage" },
     { "name": "ci-tests-release", "configurePreset": "ci-tests-release" },
-    { "name": "ci-relwithdebinfo", "configurePreset": "ci-relwithdebinfo" }
+    { "name": "ci-relwithdebinfo", "configurePreset": "ci-relwithdebinfo" },
+    { "name": "ci-release", "configurePreset": "ci-release" }
   ],
 
   "testPresets": [
     {
       "name": "dev-debug-asan",
       "configurePreset": "dev-debug-asan",
-      "output": { "outputOnFailure": true }
+      "output": { "outputOnFailure": true },
+      "execution": { "stopOnFailure": true }
     },
     {
       "name": "dev-debug-tsan",
       "configurePreset": "dev-debug-tsan",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "ci-coverage",
+      "configurePreset": "ci-coverage",
       "output": { "outputOnFailure": true }
     },
     {
